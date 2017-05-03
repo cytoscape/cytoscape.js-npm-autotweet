@@ -1,0 +1,19 @@
+{
+  "name": "npm-autotweet",
+  "version": "1.0.0",
+  "description": "Autotweet npm package releases",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "Max Franz",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "node-schedule": "^1.2.1",
+    "package-json": "^4.0.1",
+    "twitter": "^1.7.0"
+  }
+}
