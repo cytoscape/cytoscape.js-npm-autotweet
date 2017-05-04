@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node index"
   },
+  "engines": {
+    "node": ">=6.10.2",
+    "npm": ">=3.10.10"
+  },
   "author": "Max Franz",
   "license": "MIT",
   "dependencies": {
