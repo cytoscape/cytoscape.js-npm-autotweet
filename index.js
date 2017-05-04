@@ -6,12 +6,15 @@ const EventEmitter = require('events');
 const Twitter = require('twitter');
 const process = require('process');
 const _ = require('lodash');
+const http = require('http');
 
 let defaults = {
   START_TIME: '',
   PACKAGES: '',
   CRON: '* */5 * * * *',
   TWEET: 'Version {ver} of {pkg} released on npm https://www.npmjs.com/package/{pkg}',
+  BIND: '',
+  PORT: 3000,
   CONSUMER_KEY: undefined,
   CONSUMER_SECRET: undefined,
   ACCESS_TOKEN_KEY: undefined,
@@ -121,3 +124,11 @@ schedule.scheduleJob( schedConf, function(){
     lastCheckTime = startTime;
   } );
 } );
+
+if( opts.BIND ){
+  let server = http.createServer( ( req, res ) => {
+    res.end();
+  } );
+
+  server.listen( opts.PORT );
+}
