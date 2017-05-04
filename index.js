@@ -32,7 +32,7 @@ let isNonemptyString = str => str != null && str !== '' && !str.match(/^\s+$/)
 
 let packages = opts.PACKAGES.split(/\s+/).filter( isNonemptyString );
 
-let lastCheckTime = opts.START_TIME ? moment( opts.START_TIME ) : moment();
+let lastCheckTime = opts.START_TIME ? moment( opts.START_TIME ) : moment().subtract(1, 'day');
 
 let twitterClient = new Twitter({
   consumer_key: opts.CONSUMER_KEY,
