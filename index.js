@@ -7,11 +7,12 @@ const Twitter = require('twitter');
 const process = require('process');
 const _ = require('lodash');
 const http = require('http');
+const pkgJson = require('./package.json');
 
 let defaults = {
   START_TIME: '',
   PACKAGES: '',
-  CRON: '* */5 * * * *',
+  CRON: '*/5 * * * *',
   TWEET: 'Version {ver} of {pkg} released on npm https://www.npmjs.com/package/{pkg}',
   BIND: '',
   PORT: 3000,
@@ -104,7 +105,11 @@ bus.on( 'nonewvers', pkg => {
   console.log(`No new versions found for ${pkg}`);
 } );
 
-console.log(`Basing initial check time as ${lastCheckTime.format( dateFormat )} from START_TIME="${opts.START_TIME}"`);
+console.log(`Starting npm-autotweet@${pkgJson.version} with options`);
+
+console.log( JSON.stringify( opts, null, 2 ) );
+
+console.log(`Basing initial check time as ${lastCheckTime.format( dateFormat )}`);
 
 schedule.scheduleJob( schedConf, function(){
   let startTime = moment();
@@ -126,6 +131,8 @@ schedule.scheduleJob( schedConf, function(){
 } );
 
 if( opts.BIND ){
+  console.log(`Binding http server to port ${opts.PORT}`);
+
   let server = http.createServer( ( req, res ) => {
     res.end();
   } );
