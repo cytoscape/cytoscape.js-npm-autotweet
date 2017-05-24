@@ -53,7 +53,13 @@ let getVersions = ( pkg, afterDate ) => {
     return Array.from( versions.keys() ).filter( ver => {
       let date = moment( versions.get( ver ) );
 
-      return date.isAfter( afterDate );
+      if( date.isAfter( afterDate ) ){
+        bus.emit('newver', pkg, ver, afterDate, date);
+
+        return true;
+      } else {
+        return false;
+      }
     } );
   } );
 };
@@ -62,6 +68,8 @@ let getNewVersions = pkg => {
   return getVersions( pkg, lastCheckTime ).then( vers => {
     if( vers.length === 0 ){
       bus.emit( 'nonewvers', pkg );
+    } else {
+      bus.emit( 'newvers', pkg, vers );
     }
 
     return vers;
@@ -88,7 +96,13 @@ let tweetVersion = ( pkg, ver ) => {
 
 let tweetVersions = ( pkg, vers ) => Promise.all( vers.map( v => tweetVersion( pkg, v ) ) );
 
-let tweetNewReleases = pkg => getNewVersions( pkg ).then( vers => tweetVersions( pkg, vers ) );
+let tweetNewReleases = pkg => getNewVersions( pkg ).then( vers => {
+  if( vers.length === 0 ){
+    return Promise.resolve();
+  } else {
+    return tweetVersions( pkg, vers );
+  }
+} );
 
 let schedConf = opts.CRON;
 
@@ -105,6 +119,14 @@ bus.on( 'nonewvers', pkg => {
   console.log(`No new versions found for ${pkg}`);
 } );
 
+bus.on( 'newvers', (pkg, vers) => {
+  console.log(`New versions of ${pkg} : ${vers}`);
+} );
+
+bus.on( 'newver', (pkg, ver, afterDate, date) => {
+  console.log(`New version ${pkg}@${ver} published at ${date.format( dateFormat )} (after ${afterDate.format( dateFormat )})`);
+} );
+
 console.log(`Starting npm-autotweet@${pkgJson.version} with options`);
 
 console.log( JSON.stringify( opts, null, 2 ) );
@@ -119,9 +141,15 @@ schedule.scheduleJob( schedConf, function(){
     return;
   }
 
-  console.log(`Checking packages for new versions at ${startTime.format( dateFormat )}`);
+  console.log(`Checking packages for new versions at ${startTime.format( dateFormat )}, with threshold ${lastCheckTime.format( dateFormat )}`);
 
-  Promise.all( packages.map( tweetNewReleases ) ).then( () => {
+  Promise.all( packages.map( pkg => {
+    return tweetNewReleases( pkg ).catch( err => {
+      console.error( err );
+
+      return Promise.resolve();
+    } );
+  } ) ).then( () => {
     let endTime = moment();
 
     console.log(`Finished checking packages at ${endTime.format( dateFormat )}`);
