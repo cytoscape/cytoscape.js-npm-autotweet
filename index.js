@@ -26,13 +26,11 @@ let opts = _.assign( {}, defaults, _.pick( process.env, _.keys( defaults ) ) );
 
 let bus = new EventEmitter();
 
-let dateFormat = 'YYYY-MM-DD HH:mm:ss';
-
 let isNonemptyString = str => str != null && str !== '' && !str.match(/^\s+$/)
 
 let packages = opts.PACKAGES.split(/\s+/).filter( isNonemptyString );
 
-let lastCheckTime = opts.START_TIME ? moment( opts.START_TIME ) : moment();
+let lastCheckTime = opts.START_TIME ? moment.utc(opts.START_TIME) : moment.utc();
 
 let twitterClient = new Twitter({
   consumer_key: opts.CONSUMER_KEY,
@@ -51,7 +49,7 @@ let getVersions = ( pkg, afterDate ) => {
     })() );
 
     return Array.from( versions.keys() ).filter( ver => {
-      let date = moment( versions.get( ver ) );
+      let date = moment.utc( versions.get( ver ) );
 
       if( date.isAfter( afterDate ) ){
         bus.emit('newver', pkg, ver, afterDate, date);
@@ -124,24 +122,24 @@ bus.on( 'newvers', (pkg, vers) => {
 } );
 
 bus.on( 'newver', (pkg, ver, afterDate, date) => {
-  console.log(`New version ${pkg}@${ver} published at ${date.format( dateFormat )} (after ${afterDate.format( dateFormat )})`);
+  console.log(`New version ${pkg}@${ver} published at ${date.format()} (after ${afterDate.format()})`);
 } );
 
 console.log(`Starting npm-autotweet@${pkgJson.version} with options`);
 
 console.log( JSON.stringify( opts, null, 2 ) );
 
-console.log(`Basing initial check time as ${lastCheckTime.format( dateFormat )}`);
+console.log(`Basing initial check time as ${lastCheckTime.format()}`);
 
 schedule.scheduleJob( schedConf, function(){
-  let startTime = moment();
+  let startTime = moment.utc();
 
   if( packages.length === 0 ){
     console.error('No packages are specified');
     return;
   }
 
-  console.log(`Checking packages for new versions at ${startTime.format( dateFormat )}, with threshold ${lastCheckTime.format( dateFormat )}`);
+  console.log(`Checking packages for new versions at ${startTime.format()}, with threshold ${lastCheckTime.format()}`);
 
   Promise.all( packages.map( pkg => {
     return tweetNewReleases( pkg ).catch( err => {
@@ -150,9 +148,9 @@ schedule.scheduleJob( schedConf, function(){
       return Promise.resolve();
     } );
   } ) ).then( () => {
-    let endTime = moment();
+    let endTime = moment.utc();
 
-    console.log(`Finished checking packages at ${endTime.format( dateFormat )}`);
+    console.log(`Finished checking packages at ${endTime.format()}`);
 
     lastCheckTime = startTime;
   } );
