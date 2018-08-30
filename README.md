@@ -1,5 +1,7 @@
 # npm-autotweet
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/maxkfranz/npm-autotweet.svg)](https://greenkeeper.io/)
+
 Automatically tweets new releases for your npm packages to your twitter account.
 
 ## Usage
