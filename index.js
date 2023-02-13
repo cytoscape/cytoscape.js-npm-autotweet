@@ -102,8 +102,6 @@ let tweetNewReleases = pkg => getNewVersions( pkg ).then( vers => {
   }
 } );
 
-let schedConf = opts.CRON;
-
 let main = function(){
   let startTime = moment.utc();
 
@@ -152,7 +150,7 @@ bus.on( 'newver', (pkg, ver, afterDate, date) => {
 
 console.log(`Starting npm-autotweet@${pkgJson.version} with options`);
 
-console.log( JSON.stringify( opts, null, 2 ) );
+console.log( _.pick(JSON.stringify( opts, null, 2 ), ['TIME_SPAN', 'PACKAGES', 'TWEET']) );
 
 console.log(`Basing initial check time as ${lastCheckTime.format()}`);
 
