@@ -75,9 +75,11 @@ let getTweetText = ( pkg, ver ) => {
 let tweetVersion = ( pkg, ver ) => {
   let text = getTweetText( pkg, ver );
 
-  console.log("TWEET");
-  console.log(text);
-  return;
+  if (process.env.TEST === 'true') {
+    console.log("Detected TEST=true mode, so only showing tweet preview instead of posting:");
+    console.log(text);
+    return;
+  }
 
   return twitterClient.post( 'statuses/update', { status: text } ).then( tweet => {
     bus.emit( 'tweet', pkg, ver, text );
