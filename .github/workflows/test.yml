@@ -8,10 +8,11 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     container: node:16
+    environment: test
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install dependencies
         run: npm install
@@ -19,7 +20,10 @@ jobs:
       - name: Run tests
         run: npm test
         env:
-          TEST: 'true'
-          TIME_SPAN: 365
+          TIME_SPAN: ${{ vars.TIME_SPAN }}
           PACKAGES: ${{ vars.PACKAGES }}
           TWEET: ${{ vars.TWEET }}
+          CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+          CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+          ACCESS_TOKEN_KEY: ${{ secrets.ACCESS_TOKEN_KEY }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
