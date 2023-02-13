@@ -21,3 +21,5 @@ jobs:
         env:
           TEST: 'true'
           TIME_SPAN: 365
+          PACKAGES: ${{ env.PACKAGES }}
+          TWEET: ${{ env.TWEET }}
