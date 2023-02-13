@@ -1,21 +1,15 @@
-const Promise = require('bluebird');
 const getPackageJson = require('package-json');
 const moment = require('moment');
-const schedule = require('node-schedule');
 const EventEmitter = require('events');
 const Twitter = require('twitter');
 const process = require('process');
 const _ = require('lodash');
-const http = require('http');
 const pkgJson = require('./package.json');
 
 let defaults = {
-  START_TIME: '',
+  TIME_SPAN: 1,
   PACKAGES: '',
-  CRON: '*/5 * * * *',
   TWEET: 'Version {ver} of {pkg} released on npm https://www.npmjs.com/package/{pkg}',
-  BIND: '',
-  PORT: 3000,
   CONSUMER_KEY: undefined,
   CONSUMER_SECRET: undefined,
   ACCESS_TOKEN_KEY: undefined,
@@ -30,7 +24,7 @@ let isNonemptyString = str => str != null && str !== '' && !str.match(/^\s+$/)
 
 let packages = opts.PACKAGES.split(/\s+/).filter( isNonemptyString );
 
-let lastCheckTime = opts.START_TIME ? moment.utc(opts.START_TIME) : moment.utc();
+let lastCheckTime = moment.utc().subtract(parseInt(opts.TIME_SPAN), 'days');
 
 let twitterClient = new Twitter({
   consumer_key: opts.CONSUMER_KEY,
@@ -81,6 +75,10 @@ let getTweetText = ( pkg, ver ) => {
 let tweetVersion = ( pkg, ver ) => {
   let text = getTweetText( pkg, ver );
 
+  console.log("TWEET");
+  console.log(text);
+  return;
+
   return twitterClient.post( 'statuses/update', { status: text } ).then( tweet => {
     bus.emit( 'tweet', pkg, ver, text );
 
@@ -103,6 +101,31 @@ let tweetNewReleases = pkg => getNewVersions( pkg ).then( vers => {
 } );
 
 let schedConf = opts.CRON;
+
+let main = function(){
+  let startTime = moment.utc();
+
+  if( packages.length === 0 ){
+    console.error('No packages are specified');
+    return;
+  }
+
+  console.log(`Checking packages for new versions at ${startTime.format()}, with threshold ${lastCheckTime.format()}`);
+
+  Promise.all( packages.map( pkg => {
+    return tweetNewReleases( pkg ).catch( err => {
+      console.error( err );
+
+      return Promise.resolve();
+    } );
+  } ) ).then( () => {
+    let endTime = moment.utc();
+
+    console.log(`Finished checking packages at ${endTime.format()}`);
+
+    lastCheckTime = startTime;
+  } );
+};
 
 bus.on( 'tweet', ( pkg, ver, text ) => {
   console.log(`Tweet ${pkg}@${ver} : ${text}`);
@@ -131,37 +154,4 @@ console.log( JSON.stringify( opts, null, 2 ) );
 
 console.log(`Basing initial check time as ${lastCheckTime.format()}`);
 
-schedule.scheduleJob( schedConf, function(){
-  let startTime = moment.utc();
-
-  if( packages.length === 0 ){
-    console.error('No packages are specified');
-    return;
-  }
-
-  console.log(`Checking packages for new versions at ${startTime.format()}, with threshold ${lastCheckTime.format()}`);
-
-  Promise.all( packages.map( pkg => {
-    return tweetNewReleases( pkg ).catch( err => {
-      console.error( err );
-
-      return Promise.resolve();
-    } );
-  } ) ).then( () => {
-    let endTime = moment.utc();
-
-    console.log(`Finished checking packages at ${endTime.format()}`);
-
-    lastCheckTime = startTime;
-  } );
-} );
-
-if( opts.BIND ){
-  console.log(`Binding http server to port ${opts.PORT}`);
-
-  let server = http.createServer( ( req, res ) => {
-    res.end();
-  } );
-
-  server.listen( opts.PORT );
-}
+main();

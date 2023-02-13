@@ -4,19 +4,16 @@
   "description": "Autotweet npm package releases",
   "main": "index.js",
   "scripts": {
-    "start": "node index"
+    "start": "node index.js"
   },
   "engines": {
-    "node": ">=6.10.2",
-    "npm": ">=3.10.10"
+    "node": ">=16"
   },
   "author": "Max Franz",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.5.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
-    "node-schedule": "^1.2.1",
     "package-json": "^4.0.1",
     "twitter": "^1.7.0"
   }

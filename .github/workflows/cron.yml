@@ -1,0 +1,25 @@
+name: Tweet cron job
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # (every day at 1am)
+    - cron:  '0 1 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    container: node:16
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tweet script
+        run: npm start
+        
