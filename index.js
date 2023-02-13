@@ -6,6 +6,8 @@ const process = require('process');
 const _ = require('lodash');
 const pkgJson = require('./package.json');
 
+let isNonemptyString = str => str != null && str !== '' && !str.match(/^\s+$/)
+
 let defaults = {
   TIME_SPAN: 1,
   PACKAGES: '',
@@ -16,7 +18,15 @@ let defaults = {
   ACCESS_TOKEN_SECRET: undefined
 };
 
-let opts = _.assign( {}, defaults, _.pick( process.env, _.keys( defaults ) ) );
+let env = {};
+
+Object.keys(defaults).forEach(k => {
+  if (isNonemptyString(process.env[k])) {
+    env[k] = process.env[k];
+  }
+});
+
+let opts = _.assign({}, defaults, env);
 
 let sanitizeOpts = opts => {
   const sanitize = x => x == null ? 'null' : 'sanitized';
@@ -30,8 +40,6 @@ let sanitizeOpts = opts => {
 };
 
 let bus = new EventEmitter();
-
-let isNonemptyString = str => str != null && str !== '' && !str.match(/^\s+$/)
 
 let packages = opts.PACKAGES.split(/\s+/).filter( isNonemptyString );
 
