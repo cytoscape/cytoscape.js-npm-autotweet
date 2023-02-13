@@ -18,6 +18,17 @@ let defaults = {
 
 let opts = _.assign( {}, defaults, _.pick( process.env, _.keys( defaults ) ) );
 
+let sanitizeOpts = opts => {
+  const sanitize = x => x == null ? 'null' : 'sanitized';
+
+  return _.assign({}, opts, {
+    CONSUMER_KEY: sanitize(opts.CONSUMER_KEY),
+    CONSUMER_SECRET: sanitize(opts.CONSUMER_SECRET),
+    ACCESS_TOKEN_KEY: sanitize(opts.ACCESS_TOKEN_KEY),
+    ACCESS_TOKEN_SECRET: sanitize(opts.ACCESS_TOKEN_SECRET)
+  });
+};
+
 let bus = new EventEmitter();
 
 let isNonemptyString = str => str != null && str !== '' && !str.match(/^\s+$/)
@@ -150,7 +161,7 @@ bus.on( 'newver', (pkg, ver, afterDate, date) => {
 
 console.log(`Starting npm-autotweet@${pkgJson.version} with options`);
 
-console.log( _.pick(JSON.stringify( opts, null, 2 ), ['TIME_SPAN', 'PACKAGES', 'TWEET']) );
+console.log( JSON.stringify( sanitizeOpts(opts), null, 2 ) );
 
 console.log(`Basing initial check time as ${lastCheckTime.format()}`);
 

@@ -23,9 +23,9 @@ jobs:
       - name: Run tweet script
         run: npm start
         env:
-          TIME_SPAN: ${{ env.TIME_SPAN }}
-          PACKAGES: ${{ env.PACKAGES }}
-          TWEET: ${{ env.TWEET }}
+          TIME_SPAN: ${{ vars.TIME_SPAN }}
+          PACKAGES: ${{ vars.PACKAGES }}
+          TWEET: ${{ vars.TWEET }}
           CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
           CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
           ACCESS_TOKEN_KEY: ${{ secrets.ACCESS_TOKEN_KEY }}
